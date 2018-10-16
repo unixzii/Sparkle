@@ -7,8 +7,12 @@
 //
 
 #import "SUScheduledUpdateDriver.h"
+#import "SUBasicUpdateDriver+Private.h"
 #import "SUUpdaterPrivate.h"
 #import "SUUpdaterDelegate.h"
+#import "SUHost.h"
+#import "SUAppcastItem.h"
+#import "SUVersionComparisonProtocol.h"
 
 @interface SUScheduledUpdateDriver ()
 
@@ -26,6 +30,14 @@
 
 - (void)didFindValidUpdate
 {
+    if (self.updateItem.silentAfterVersion) {
+        NSString *silentAfterVersion = self.updateItem.silentAfterVersion;
+        id<SUVersionComparison> comparator = [self versionComparator];
+        if ([comparator compareVersion:self.host.version toVersion:silentAfterVersion] == NSOrderedDescending) {
+            self.updateSilently = YES;
+        }
+    }
+    
     self.showErrors = YES; // We only start showing errors after we present the UI for the first time.
     [super didFindValidUpdate];
 }

@@ -68,6 +68,8 @@ NSString *const SUAppcastElementMaximumSystemVersion = @"sparkle:maximumSystemVe
 NSString *const SUAppcastElementReleaseNotesLink = @"sparkle:releaseNotesLink";
 NSString *const SUAppcastElementTags = @"sparkle:tags";
 
+NSString *const SUAppcastElementSilentAfterVersion = @"sparkle:silentAfterVersion";
+
 NSString *const SURSSAttributeURL = @"url";
 NSString *const SURSSAttributeLength = @"length";
 

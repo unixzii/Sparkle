@@ -28,6 +28,7 @@
 @property (copy, readwrite) NSDictionary *deltaUpdates;
 @property (strong, readwrite) NSURL *infoURL;
 @property (readwrite, copy) NSDictionary *propertiesDictionary;
+@property (copy, readwrite) NSString *silentAfterVersion;
 @end
 
 @implementation SUAppcastItem
@@ -46,6 +47,7 @@
 @synthesize versionString;
 @synthesize osString;
 @synthesize propertiesDictionary;
+@synthesize silentAfterVersion;
 
 - (BOOL)isDeltaUpdate
 {
@@ -174,6 +176,8 @@
         } else {
             self.displayVersionString = self.versionString;
         }
+
+        self.silentAfterVersion = [enclosure objectForKey:SUAppcastElementSilentAfterVersion];
 
         // Find the appropriate release notes URL.
         NSString *releaseNotesString = [dict objectForKey:SUAppcastElementReleaseNotesLink];

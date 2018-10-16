@@ -46,6 +46,7 @@
 @synthesize statusController;
 @synthesize updateAlert;
 @synthesize showErrors;
+@synthesize updateSilently;
 
 - (instancetype)initWithUpdater:(id<SUUpdaterPrivate>)anUpdater
 {
@@ -63,7 +64,7 @@
         [[updater delegate] updater:self.updater didFindValidUpdate:self.updateItem];
     }
 
-    if (self.automaticallyInstallUpdates) {
+    if (self.automaticallyInstallUpdates || self.updateSilently) {
         [self updateAlertFinishedWithChoice:SUInstallUpdateChoice];
         return;
     }
@@ -152,6 +153,10 @@
 
 - (void)downloadUpdate
 {
+    if (self.updateSilently) {
+        goto finally;
+    }
+
     BOOL createdStatusController = NO;
     if (self.statusController == nil) {
         self.statusController = [[SUStatusController alloc] initWithHost:self.host];
@@ -166,6 +171,7 @@
         [self.statusController showWindow:self];
     }
     
+finally:
     [super downloadUpdate];
 }
 
@@ -268,7 +274,7 @@
 
 - (void)unarchiverDidFinish:(id)__unused ua
 {
-    if (self.automaticallyInstallUpdates) {
+    if (self.automaticallyInstallUpdates || self.updateSilently) {
         [self installWithToolAndRelaunch:YES];
         return;
     }
@@ -288,6 +294,12 @@
 
 - (void)installWithToolAndRelaunch:(BOOL)relaunch
 {
+    if (self.updateSilently) {
+        // Since we are performing a silent updating, suppress all user interfaces.
+        [self installWithToolAndRelaunch:relaunch displayingUserInterface:NO];
+        return;
+    }
+
     [self.statusController beginActionWithTitle:SULocalizedString(@"Installing update...", @"Take care not to overflow the status window.") maxProgressValue:0.0 statusText:nil];
     [self.statusController setButtonEnabled:NO];
     [super installWithToolAndRelaunch:relaunch];

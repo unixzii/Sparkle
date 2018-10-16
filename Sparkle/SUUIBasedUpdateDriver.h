@@ -16,6 +16,7 @@
 
 @interface SUUIBasedUpdateDriver : SUBasicUpdateDriver
 @property (assign) BOOL showErrors;
+@property (assign) BOOL updateSilently;
 
 - (void)showAlert:(NSAlert *)alert;
 - (IBAction)cancelDownload:(id)sender;

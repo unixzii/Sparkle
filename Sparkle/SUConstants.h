@@ -80,6 +80,8 @@ extern NSString *const SUAppcastElementMaximumSystemVersion;
 extern NSString *const SUAppcastElementReleaseNotesLink;
 extern NSString *const SUAppcastElementTags;
 
+extern NSString *const SUAppcastElementSilentAfterVersion;
+
 extern NSString *const SURSSAttributeURL;
 extern NSString *const SURSSAttributeLength;
 

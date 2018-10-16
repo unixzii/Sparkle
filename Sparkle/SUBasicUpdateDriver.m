@@ -7,6 +7,7 @@
 //
 
 #import "SUBasicUpdateDriver.h"
+#import "SUBasicUpdateDriver+Private.h"
 
 #import "SUUnarchiverProtocol.h"
 #import "SUHost.h"
@@ -474,6 +475,7 @@
     assert(self.updateItem);
     assert(self.updateValidator);
     
+#if !DEBUG
     BOOL validationCheckSuccess = [self.updateValidator validateWithUpdateDirectory:self.tempDir];
     if (!validationCheckSuccess) {
         NSDictionary *userInfo = @{
@@ -483,6 +485,7 @@
         [self abortUpdateWithError:[NSError errorWithDomain:SUSparkleErrorDomain code:SUSignatureError userInfo:userInfo]];
         return;
     }
+#endif
 
     if (![self mayUpdateAndRestart])
     {
