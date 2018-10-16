@@ -38,6 +38,7 @@
 
 @property (strong) SUStatusController *statusController;
 @property (strong) SUUpdateAlert *updateAlert;
+@property (strong) id observerForPostponedUpdating;
 
 @end
 
@@ -47,6 +48,7 @@
 @synthesize updateAlert;
 @synthesize showErrors;
 @synthesize updateSilently;
+@synthesize observerForPostponedUpdating;
 
 - (instancetype)initWithUpdater:(id<SUUpdaterPrivate>)anUpdater
 {
@@ -100,6 +102,10 @@
 
 - (BOOL)shouldDisableKeyboardShortcutForInstallButton {
     return NO;
+}
+
+- (BOOL)isInterruptible {
+    return self.updateSilently && self.observerForPostponedUpdating;
 }
 
 - (void)didNotFindUpdate
@@ -295,8 +301,15 @@ finally:
 - (void)installWithToolAndRelaunch:(BOOL)relaunch
 {
     if (self.updateSilently) {
-        // Since we are performing a silent updating, suppress all user interfaces.
-        [self installWithToolAndRelaunch:relaunch displayingUserInterface:NO];
+        // Since we are performing a silent updating, users should not be interrupted
+        // while using the app. Schedule the installing before termination.
+        self.observerForPostponedUpdating =
+        [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationWillTerminateNotification
+                                                          object:nil
+                                                           queue:[NSOperationQueue mainQueue]
+                                                      usingBlock:^(NSNotification * _Nonnull __unused note) {
+                                                          [super installWithToolAndRelaunch:NO];
+                                                      }];
         return;
     }
 
@@ -341,6 +354,15 @@ finally:
 
 - (void)abortUpdate
 {
+    if (self.observerForPostponedUpdating) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self.observerForPostponedUpdating];
+
+        [self setValue:@YES forKey:@"finished"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:SUUpdateDriverFinishedNotification object:self];
+
+        return;
+    }
+
 	if (self.statusController)
 	{
         [self.statusController close];
